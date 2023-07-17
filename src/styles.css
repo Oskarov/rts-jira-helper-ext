@@ -1,0 +1,97 @@
+.dream-btns {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.dream-btn {
+    display: flex;
+    border-radius: 3.01px;
+    margin: 8px 4px 0 29px;
+    background-image: none;
+    background-color: #ecedf0;
+    color: #344563;
+    text-decoration: none;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
+    width: fit-content;
+    cursor: pointer;
+}
+
+.dream-btn.dream-btn2 {
+    margin-left: 0;
+}
+
+.dream-btn:hover {
+    background-color: #dfe2e7;
+}
+
+.dream-table {
+    display: flex;
+    align-items: flex-start;
+    font-size: 12px;
+    width: 100%;
+    border: 1px solid black;
+}
+
+.dream-title {
+    margin-bottom: 0;
+    font-size: 12px;
+    padding: 4px 0;
+    border-bottom: 1px solid black;
+}
+
+.dream-inner {
+    border-right: 1px solid black;
+    flex: 1 1 auto;
+    text-align: center;
+}
+
+.dream-inner:last-child {
+    border-right: transparent;
+}
+
+.dream-th {
+    display: flex;
+    width: 100%;
+    text-align: center;
+    border-bottom: 1px solid black;
+}
+
+.dream-th > div {
+    width: 7px;
+    height: 80px;
+    flex: 1 1 auto;
+    border-right: 1px solid black;
+    font-weight: 800;
+    position: relative;
+}
+
+.dream-th > div:last-child {
+    border-right: none;
+}
+
+.dream-th > div > span {
+    position: relative;
+    bottom: -29px;
+    text-align: center;
+    display: block;
+    transform: rotate(-90deg);
+}
+
+.dream-vals {
+    display: flex;
+}
+
+.dream-vals > div {
+    width: 10px;
+    font-size: 10px;
+    padding: 4px 0;
+    flex: 1 1 auto;
+    text-align: center;
+    border-right: 1px solid black;
+}
+
+.dream-vals > div:last-child {
+    border-right: none;
+}

@@ -1,0 +1,71 @@
+{
+  "name": "ts-extension-starter",
+  "version": "1.0.0",
+  "description": "A starter repo for building Chrome browser extensions in v3 manifest using Typescript and Rollup.",
+  "license": "MIT",
+  "author": "Ross Moody<@_rossmoody>",
+  "keywords": [
+    "chrome-extension",
+    "web-extension",
+    "typescript",
+    "react",
+    "rollup",
+    "boilerplate"
+  ],
+  "homepage": "https://github.com/rossmoody/ts-extension-starter#readme",
+  "bugs": {
+    "url": "https://github.com/rossmoody/ts-extension-starter/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rossmoody/ts-extension-starter.git"
+  },
+  "scripts": {
+    "build": "rollup -c",
+    "release": "cross-env NODE_ENV=production rollup -c",
+    "start": "rollup -c -w"
+  },
+  "dependencies": {
+    "jquery": "^3.7.0",
+    "react": "^18.1.0",
+    "react-dom": "^18.1.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-alias": "^3.1.1",
+    "@rollup/plugin-commonjs": "^17.0.0",
+    "@rollup/plugin-node-resolve": "^11.0.1",
+    "@rollup/plugin-replace": "^3.0.0",
+    "@rollup/plugin-typescript": "^8.1.0",
+    "@types/chrome": "^0.0.180",
+    "@types/firefox-webext-browser": "^82.0.0",
+    "@types/jquery": "^3.5.16",
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^18.2.7",
+    "@typescript-eslint/eslint-plugin": "^4.10.0",
+    "@typescript-eslint/parser": "^4.10.0",
+    "cross-env": "^7.0.3",
+    "esbuild": "^0.14.38",
+    "eslint": "^7.16.0",
+    "eslint-plugin-react": "^7.21.5",
+    "prettier": "^2.2.1",
+    "rollup": "^2.56.3",
+    "rollup-plugin-chrome-extension": "^3.6.8",
+    "rollup-plugin-empty-dir": "^1.0.5",
+    "rollup-plugin-zip": "^1.0.3",
+    "tslib": "^2.0.3",
+    "typescript": "^4.6.0",
+    "webextension-polyfill": "^0.7.0"
+  },
+  "engines": {
+    "npm": ">=6.0.0",
+    "node": ">=14.0.0"
+  },
+  "prettier": {
+    "semi": false,
+    "tabWidth": 2,
+    "trailingComma": "all",
+    "singleQuote": true,
+    "arrowParens": "always",
+    "proseWrap": "always"
+  }
+}
