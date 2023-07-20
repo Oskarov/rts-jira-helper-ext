@@ -6,7 +6,7 @@
   "background": {
     "service_worker": "background.ts"
   },
-  "permissions": ["activeTab", "scripting"],
+  "permissions": ["activeTab", "scripting", "storage"],
   "action": {
     "default_icon": {
       "16": "assets/icons/16.png",
