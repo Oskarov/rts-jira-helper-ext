@@ -8,6 +8,10 @@ export interface IIssue {
     id: string,
     key: string, // номер типа TMS-2121
     fields: {
+        parent: {
+            id: string,
+            key: string,
+        } | undefined,
         resolution: { // статус
             id: string,
             name: string,

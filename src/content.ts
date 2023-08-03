@@ -296,7 +296,7 @@ const generateStat = (sprintNumber: string, response: IJiraIssues) => {
     let taskNames: any = [];
 
 
-    response.issues.forEach((task, idx) => {
+    response.issues.filter(task => !task.fields.parent).forEach((task, idx) => {
         const taskTime = task.fields.aggregatetimeoriginalestimate ? task.fields.aggregatetimeoriginalestimate / 60 / 60 : 0;
         const taskLabels = task.fields.labels;
         let label = '';
@@ -366,6 +366,7 @@ const generateStat = (sprintNumber: string, response: IJiraIssues) => {
     });
 
     const newTable = document.createElement('div');
+    newTable.className = 'rts-stat-item';
     newTable.innerHTML = `<div>
         <h3 style="margin-bottom: 8px; padding-top: 8px; font-weight: bold;">Всего задач:  ${totalCount} ${stopLabelsCount > 0 ? `/ ${stopLabelsCount}` : ''}</h3>
         <div style="margin-bottom: 8px">
@@ -438,6 +439,7 @@ const generateStat = (sprintNumber: string, response: IJiraIssues) => {
 
     let container = document.querySelector(`[data-sprint-id="${sprintNumber}"]`);
     if (container) {
+        container.querySelectorAll('.rts-stat-item').forEach(element => element.remove());
         container.prepend(newTable)
     }
 }
