@@ -1,0 +1,54 @@
+{
+  "manifest_version": 3,
+  "name": "eApteka sprint statistics integrated",
+  "version": "1.0.0",
+  "description": "Подсчет статистики по спринтам с интеграцией в Jira",
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "action": {
+    "default_icon": {
+      "16": "assets/icons/16.png",
+      "24": "assets/icons/24.png",
+      "32": "assets/icons/32.png"
+    },
+    "default_title": "Статистика Jira",
+    "default_popup": "pages/popup/index.html"
+  },
+  "icons": {
+    "48": "assets/icons/64.png",
+    "64": "assets/icons/64.png",
+    "128": "assets/icons/128.png",
+    "256": "assets/icons/256.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://jira.eapteka.ru/*"
+      ],
+      "js": [
+        "import-content.js"
+      ]
+    }
+  ],
+  "host_permissions": [
+    "https://jira.eapteka.ru/*"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "chunks/*-*.js",
+        "content.js"
+      ],
+      "matches": [
+        "https://jira.eapteka.ru/*"
+      ]
+    }
+  ]
+}
