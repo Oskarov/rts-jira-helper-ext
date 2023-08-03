@@ -1,4 +1,6 @@
-import {IJiraIssues} from "./IJira";
+import {IJiraIssues} from "./interfaces/IIssue";
+
+let savedStatuses: string[] = [];
 
 setTimeout((eve) => {
     let container = document.querySelectorAll('.ghx-controls.aui-group');
@@ -6,6 +8,32 @@ setTimeout((eve) => {
     if (container) {
 
         let styles = `
+.not-active {
+    display: none !important;
+}        
+.dream-status-buttons {
+    padding-top: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}
+
+.dream-status-buttons > div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 8px;
+    margin-right: 4px;
+    margin-bottom: 4px;
+    background: #f6f6f6;
+    border-radius: 5px;
+    user-select: none;
+}
+
+.dream-status-buttons > div.active {
+    background: #7af182
+}                     
+        
 .dream-btns {
     display: flex;
     justify-content: flex-start;
@@ -24,6 +52,7 @@ setTimeout((eve) => {
     padding: 4px 10px;
     width: fit-content;
     cursor: pointer;
+    user-select: none;
 }
 
 .dream-btn.dream-btn2 {
@@ -107,7 +136,9 @@ setTimeout((eve) => {
 
         let styleSheet = document.createElement("style");
         styleSheet.innerText = styles;
-        document.head.appendChild(styleSheet)
+        document.head.appendChild(styleSheet);
+
+        settings();
 
         container.forEach((i, idx) => {
             if (i.parentNode) {
@@ -115,22 +146,13 @@ setTimeout((eve) => {
                 wrapper.className = 'dream-btns';
 
                 let btn = document.createElement("div");
-                btn.innerHTML = "Разработка завершена";
+                btn.innerHTML = "Посчитать статистику";
                 btn.id = `new-btn-${idx}`
                 btn.className = 'dream-btn';
                 btn.onclick = async (e) => {
-                    await getSprint(i, false);
+                    await getSprint(i);
                 }
                 wrapper.append(btn);
-
-                let btn2 = document.createElement("div");
-                btn2.innerHTML = "Только готовые";
-                btn2.id = `new-btn-${idx}`
-                btn2.className = 'dream-btn dream-btn2';
-                btn2.onclick = async (e) => {
-                    await getSprint(i, true);
-                }
-                wrapper.append(btn2);
 
                 i.parentNode.append(wrapper);
             }
@@ -138,7 +160,81 @@ setTimeout((eve) => {
     }
 }, 1000);
 
-const getSprint = async (i: Element, onlyReady: boolean) => {
+const settings = () => {
+
+    let wrapper = document.createElement("div");
+    wrapper.className = 'dream-settings';
+
+    const projectCont = document.querySelector('[name="ghx-project-key"]');
+    let projectName: string | null = '';
+    if (projectCont) {
+        projectName = projectCont.getAttribute('content');
+    }
+
+    if (!!projectName) {
+        const storageString = localStorage.getItem(`rts-${projectName}`);
+        if (storageString) {
+            const storageArray = storageString.split(',');
+            if (!!storageArray.length) {
+                savedStatuses = storageArray;
+            }
+        }
+    }
+
+    let allStatuses = ['done', 'готово', 'готово для теста qa', 'ожидает релиза', 'релиз', 'готово для теста', 'integration test', 'тест', 'тестирование', 'ready for release', 'rs testing', 'release stand', 'ready for release', 'feature review', 'testing', 'ready for test', 'test in progress', 'ux/ui review', 'build', 'integration test', 'ready for deployment', 'ready for ox', 'ready for rs', 'business approve', 'cancelled', 'ready for build', 'build', 'integration test', 'ready for deployment', 'test review'];
+
+    let btn = document.createElement("div");
+    btn.innerHTML = "Настройки подсчёта статистики";
+    btn.className = 'dream-btn dream-btn2';
+    btn.onclick = (e) => {
+        toggleSettings();
+    }
+    wrapper.append(btn);
+
+    const toggleSettings = () => {
+        const target = document.querySelector('#rts-settings-buttons');
+        console.log(target);
+        if (target) {
+            target.classList.toggle('not-active');
+        }
+    }
+
+    const toggleStatus = (item: string, e: EventTarget | null) => {
+        if (savedStatuses.includes(item)) {
+            savedStatuses = savedStatuses.filter(i => i !== item);
+        } else {
+            savedStatuses.push(item);
+        }
+        if (e) {
+            // @ts-ignore
+            e.classList.toggle("active");
+        }
+        if (projectName) {
+            localStorage.setItem(`rts-${projectName}`, savedStatuses.toString());
+        }
+    }
+
+    let statusButtonsWrapper = document.createElement("div");
+    statusButtonsWrapper.className = 'dream-status-buttons not-active';
+    statusButtonsWrapper.id = 'rts-settings-buttons';
+    allStatuses.forEach(item => {
+        let sbtn = document.createElement("div");
+        sbtn.innerHTML = item;
+        sbtn.className = `${savedStatuses.includes(item) ? 'active' : ''}`;
+        sbtn.onclick = (e) => {
+            toggleStatus(item, e.target);
+        }
+        statusButtonsWrapper.append(sbtn);
+    });
+    wrapper.append(statusButtonsWrapper);
+
+    let container = document.querySelector('#ghx-board-name');
+    if (container && container.parentNode && container.parentNode.parentNode) {
+        container.parentNode.parentNode.append(wrapper);
+    }
+}
+
+const getSprint = async (i: Element) => {
     let contForSprint = i.closest('.ghx-backlog-header.js-sprint-header');
     let contForProject = document.getElementById('browser-metrics-report');
     if (contForSprint && contForProject) {
@@ -169,14 +265,14 @@ const getSprint = async (i: Element, onlyReady: boolean) => {
             }
 
 
-            generateStat(sprintId || '', json, onlyReady);
+            generateStat(sprintId || '', json);
         } else {
             alert("Ошибка HTTP: " + response.status);
         }
     }
 }
 
-const generateStat = (sprintNumber: string, response: IJiraIssues, onlyReady: boolean) => {
+const generateStat = (sprintNumber: string, response: IJiraIssues) => {
     let productTasksCount = 0;
     let techDebtTasksCount = 0;
     let supportTasksCount = 0;
@@ -205,7 +301,8 @@ const generateStat = (sprintNumber: string, response: IJiraIssues, onlyReady: bo
 
         taskNames.push(task.key);
 
-        const defaultStatuses: string[] = onlyReady ? ['done', 'готово'] : ['done', 'готово', 'готово для теста qa', 'ожидает релиза', 'релиз', 'готово для теста', 'integration test', 'тест', 'тестирование', 'ready for release', 'rs testing', 'release stand', 'ready for release', 'feature review', 'testing', 'ready for test', 'test in progress', 'ux/ui review', 'build', 'integration test', 'ready for deployment', 'ready for ox', 'ready for rs', 'business approve', 'cancelled', 'ready for build', 'build', 'integration test', 'ready for deployment', 'test review'];
+        const defaultStatuses: string[] = !savedStatuses.length ? ['done', 'готово'] : savedStatuses;
+        console.log(`program get this statuses: ${defaultStatuses.toString()}`);
 
         taskLabels.forEach(labelItem => {
             if (['TechDebt', 'techDebt', 'techdebt', 'tech-debt'].includes(labelItem)) {
