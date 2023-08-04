@@ -1,13 +1,8 @@
-import {IJiraIssues} from "./interfaces/IIssue";
-
-let savedStatuses: string[] = [];
-let stopLabels: string[] = ['stop', 'Stop', 'STOP', 'exclude_from_sprint'];
-
+let savedStatuses = [];
+let stopLabels = ['stop', 'Stop', 'STOP', 'exclude_from_sprint'];
 setTimeout((eve) => {
     let container = document.querySelectorAll('.ghx-controls.aui-group');
-
     if (container) {
-
         let styles = `
 .not-active {
     display: none !important;
@@ -140,44 +135,37 @@ setTimeout((eve) => {
 .dream-vals > div:last-child {
     border-right: none;
 }
-        `
-
+        `;
         let styleSheet = document.createElement("style");
         styleSheet.innerText = styles;
         document.head.appendChild(styleSheet);
-
         settings();
-
         container.forEach((i, idx) => {
             if (i.parentNode) {
                 let wrapper = document.createElement("div");
                 wrapper.className = 'dream-btns';
-
                 let btn = document.createElement("div");
                 btn.innerHTML = "Посчитать статистику";
-                btn.id = `new-btn-${idx}`
+                btn.id = `new-btn-${idx}`;
                 btn.className = 'dream-btn';
                 btn.onclick = async (e) => {
                     await getSprint(i);
-                }
+                };
                 wrapper.append(btn);
-
                 i.parentNode.append(wrapper);
             }
         });
-
         setSprintDropdownListener();
     }
 }, 1000);
-
 const setSprintDropdownListener = () => {
-    setInterval(()=>{
+    setInterval(() => {
         let dropdown = document.querySelector('#ghx-chart-picker');
         let selectBtn = document.querySelector('#rts-select-btn');
         if (dropdown && dropdown.parentNode && !selectBtn) {
             let btn = document.createElement("div");
             btn.innerHTML = "Посчитать статистику";
-            btn.id = `rts-select-btn`
+            btn.id = `rts-select-btn`;
             btn.className = 'dream-btn sprint-select-button';
             btn.onclick = async (e) => {
                 let contForSprint = document.querySelector('#ghx-items-trigger');
@@ -187,24 +175,19 @@ const setSprintDropdownListener = () => {
                         await getSelectedSprint(sprintId);
                     }
                 }
-            }
+            };
             dropdown.parentNode.append(btn);
         }
     }, 1000);
-
-}
-
+};
 const settings = () => {
-
     let wrapper = document.createElement("div");
     wrapper.className = 'dream-settings';
-
     const projectCont = document.querySelector('[name="ghx-project-key"]');
-    let projectName: string | null = '';
+    let projectName = '';
     if (projectCont) {
         projectName = projectCont.getAttribute('content');
     }
-
     if (!!projectName) {
         const storageString = localStorage.getItem(`rts-${projectName}`);
         if (storageString) {
@@ -214,29 +197,26 @@ const settings = () => {
             }
         }
     }
-
     let allStatuses = ['done', 'готово', 'готово для теста qa', 'ожидает релиза', 'релиз', 'готово для теста', 'integration test', 'тест', 'тестирование', 'ready for release', 'rs testing', 'release stand', 'ready for release', 'feature review', 'testing', 'ready for test', 'test in progress', 'ux/ui review', 'build', 'integration test', 'ready for deployment', 'ready for ox', 'ready for rs', 'business approve', 'cancelled', 'ready for build', 'build', 'integration test', 'ready for deployment', 'test review'];
-
     let btn = document.createElement("div");
     btn.innerHTML = "Настройки подсчёта статистики";
     btn.className = 'dream-btn dream-btn2';
     btn.onclick = (e) => {
         toggleSettings();
-    }
+    };
     wrapper.append(btn);
-
     const toggleSettings = () => {
         const target = document.querySelector('#rts-settings-buttons');
         console.log(target);
         if (target) {
             target.classList.toggle('not-active');
         }
-    }
-
-    const toggleStatus = (item: string, e: EventTarget | null) => {
+    };
+    const toggleStatus = (item, e) => {
         if (savedStatuses.includes(item)) {
             savedStatuses = savedStatuses.filter(i => i !== item);
-        } else {
+        }
+        else {
             savedStatuses.push(item);
         }
         if (e) {
@@ -246,8 +226,7 @@ const settings = () => {
         if (projectName) {
             localStorage.setItem(`rts-${projectName}`, savedStatuses.toString());
         }
-    }
-
+    };
     let statusButtonsWrapper = document.createElement("div");
     statusButtonsWrapper.className = 'dream-status-buttons not-active';
     statusButtonsWrapper.id = 'rts-settings-buttons';
@@ -257,28 +236,24 @@ const settings = () => {
         sbtn.className = `${savedStatuses.includes(item) ? 'active' : ''}`;
         sbtn.onclick = (e) => {
             toggleStatus(item, e.target);
-        }
+        };
         statusButtonsWrapper.append(sbtn);
     });
     wrapper.append(statusButtonsWrapper);
-
     let container = document.querySelector('#ghx-board-name');
     if (container && container.parentNode && container.parentNode.parentNode) {
         container.parentNode.parentNode.append(wrapper);
     }
-}
-
-const getSelectedSprint = async (sprintId: string) =>{
+};
+const getSelectedSprint = async (sprintId) => {
     let contForProject = document.querySelector('.scope-filter.aui-scope-filter-spectrum > a');
-    let boardId:string | null = '';
-    if (contForProject){
+    let boardId = '';
+    if (contForProject) {
         let tString = contForProject.getAttribute('href');
         if (tString) {
             const urlParams = new URLSearchParams(tString);
             boardId = urlParams.get('/secure/RapidBoard.jspa?rapidView');
-
             let response = await fetch(`https://jira.eapteka.ru/rest/agile/1.0/board/${boardId}/sprint/${sprintId}/issue`);
-
             if (response.ok) {
                 let json = await response.json();
                 let maxResults = json.maxResults;
@@ -291,24 +266,20 @@ const getSelectedSprint = async (sprintId: string) =>{
                         if (additionalResponse.ok) {
                             let additionalJson = await additionalResponse.json();
                             let issues = additionalJson.issues;
-                            json = {...json, issues: [...json.issues, ...issues]};
+                            json = { ...json, issues: [...json.issues, ...issues] };
                             startAt = startAt + maxResults;
                         }
                     }
                 }
-
-
                 generateStat(sprintId || '', json);
-            } else {
+            }
+            else {
                 alert("Ошибка HTTP: " + response.status);
             }
         }
-
     }
-
-}
-
-const getSprint = async (i: Element) => {
+};
+const getSprint = async (i) => {
     let contForSprint = i.closest('.ghx-backlog-header.js-sprint-header');
     let contForProject = document.getElementById('browser-metrics-report');
     if (contForSprint && contForProject) {
@@ -319,7 +290,6 @@ const getSprint = async (i: Element) => {
             boardId = obj.report.entityId;
         }
         let response = await fetch(`https://jira.eapteka.ru/rest/agile/1.0/board/${boardId}/sprint/${sprintId}/issue`);
-
         if (response.ok) {
             let json = await response.json();
             let maxResults = json.maxResults;
@@ -332,54 +302,44 @@ const getSprint = async (i: Element) => {
                     if (additionalResponse.ok) {
                         let additionalJson = await additionalResponse.json();
                         let issues = additionalJson.issues;
-                        json = {...json, issues: [...json.issues, ...issues]};
+                        json = { ...json, issues: [...json.issues, ...issues] };
                         startAt = startAt + maxResults;
                     }
                 }
             }
-
-
             generateStat(sprintId || '', json);
-        } else {
+        }
+        else {
             alert("Ошибка HTTP: " + response.status);
         }
     }
-}
-
-const generateStat = (sprintNumber: string, response: IJiraIssues) => {
+};
+const generateStat = (sprintNumber, response) => {
     let productTasksCount = 0;
     let techDebtTasksCount = 0;
     let supportTasksCount = 0;
     let productTasksCountComplete = 0;
     let techDebtTasksCountComplete = 0;
     let supportTasksCountComplete = 0;
-
-    let withoutLabels: string[] = [];
-    let withoutTime: string[] = [];
-
+    let withoutLabels = [];
+    let withoutTime = [];
     let productTasksTime = 0;
     let techDebtTasksTime = 0;
     let supportTasksTime = 0;
     let productTasksTimeComplete = 0;
     let techDebtTasksTimeComplete = 0;
     let supportTasksTimeComplete = 0;
-
     let totalCount = 0;
     let stopLabelsCount = 0;
-    let taskNames: any = [];
-
-
+    let taskNames = [];
     response.issues.filter(task => !task.fields.parent).forEach((task, idx) => {
         const taskTime = task.fields.aggregatetimeoriginalestimate ? task.fields.aggregatetimeoriginalestimate / 60 / 60 : 0;
         const taskLabels = task.fields.labels;
         let label = '';
         let hasStopLabel = false;
-
         taskNames.push(task.key);
-
-        const defaultStatuses: string[] = !savedStatuses.length ? ['done', 'готово'] : savedStatuses;
+        const defaultStatuses = !savedStatuses.length ? ['done', 'готово'] : savedStatuses;
         console.log(`program get this statuses: ${defaultStatuses.toString()}`);
-
         taskLabels.forEach(labelItem => {
             if (['TechDebt', 'techDebt', 'techdebt', 'tech-debt'].includes(labelItem)) {
                 label = 'TechDebt';
@@ -394,10 +354,8 @@ const generateStat = (sprintNumber: string, response: IJiraIssues) => {
                 hasStopLabel = true;
             }
         });
-
         if (!hasStopLabel) {
-            let timeForTask = task.fields.worklog.worklogs.reduce((time, item) => (time + (!!item.timeSpentSeconds ? item.timeSpentSeconds / 60 / 60 : 0)), 0)
-
+            let timeForTask = task.fields.worklog.worklogs.reduce((time, item) => (time + (!!item.timeSpentSeconds ? item.timeSpentSeconds / 60 / 60 : 0)), 0);
             switch (label) {
                 case 'TechDebt':
                     techDebtTasksCount = techDebtTasksCount + 1;
@@ -431,13 +389,11 @@ const generateStat = (sprintNumber: string, response: IJiraIssues) => {
                 withoutTime.push(task.key);
             }
             totalCount = totalCount + 1;
-        } else {
+        }
+        else {
             stopLabelsCount = stopLabelsCount + 1;
         }
-
-
     });
-
     const newTable = document.createElement('div');
     newTable.className = 'rts-stat-item';
     newTable.innerHTML = `<div>
@@ -509,16 +465,16 @@ const generateStat = (sprintNumber: string, response: IJiraIssues) => {
                     </div>
         
     </div>`.trim();
-
     let container = document.querySelector(`[data-sprint-id="${sprintNumber}"]`);
     if (container) {
         container.querySelectorAll('.rts-stat-item').forEach(element => element.remove());
-        container.prepend(newTable)
-    } else {
+        container.prepend(newTable);
+    }
+    else {
         let alternativeContainer = document.querySelector('#ghx-chart-intro');
-        if (alternativeContainer){
+        if (alternativeContainer) {
             alternativeContainer.querySelectorAll('.rts-stat-item').forEach(element => element.remove());
-            alternativeContainer.prepend(newTable)
+            alternativeContainer.prepend(newTable);
         }
     }
-}
+};
