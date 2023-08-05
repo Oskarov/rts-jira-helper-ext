@@ -30,12 +30,10 @@ This project is not a demonstration of optimal solutions.
 ### Description
 
 Sprint data collection software. The main part is done without the use of libraries,
-but the code is written in TS and compiled using Rollup. Buttons appear in each sprint Development completed and
-Only ready. The first one considers completed tasks in any statuses after the "code review" status, the second only considers closed tasks.
+but the code is written in TS and compiled using Rollup.
 
 Программа для сбора данных по спринту. Основная часть выполнена без использования библиотек, 
-но код написан на TS и компилируется при помощи Rollup. В каждом спринте появляются кнопки Разработка завершена и
-Только готовые. Первая - считает завершенными задачи в любых статусах после статуса "код ревью", вторая только закрытые задачи.
+но код написан на TS и компилируется при помощи Rollup. 
 
 ---
 

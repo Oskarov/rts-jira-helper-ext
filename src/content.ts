@@ -215,7 +215,7 @@ const settings = () => {
         }
     }
 
-    let allStatuses = ['done', 'готово', 'готово для теста qa', 'ожидает релиза', 'релиз', 'готово для теста', 'integration test', 'тест', 'тестирование', 'ready for release', 'rs testing', 'release stand', 'ready for release', 'feature review', 'testing', 'ready for test', 'test in progress', 'ux/ui review', 'build', 'integration test', 'ready for deployment', 'ready for ox', 'ready for rs', 'business approve', 'cancelled', 'ready for build', 'build', 'integration test', 'ready for deployment', 'test review'];
+    let allStatuses = ['done', 'готово', 'готово для теста qa', 'ожидает релиза', 'релиз', 'готово для теста', 'integration test', 'тест', 'тестирование', 'rs testing', 'release stand', 'ready for release', 'feature review', 'testing', 'ready for test', 'test in progress', 'ux/ui review', 'integration test', 'ready for ox', 'ready for rs', 'business approve', 'cancelled', 'ready for build', 'build', 'integration test', 'ready for deployment', 'test review'];
 
     let btn = document.createElement("div");
     btn.innerHTML = "Настройки подсчёта статистики";
