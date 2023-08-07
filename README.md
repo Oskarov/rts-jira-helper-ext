@@ -1,6 +1,6 @@
 # rts-jira-helper-ext
 
-### Jira helper - extension fo governing statistic of the sprint
+### Jira helper - extension for governing statistic of the sprint
 
 ###Помощник по сбору статистики по спринту в жире (расширение для хрома)
 

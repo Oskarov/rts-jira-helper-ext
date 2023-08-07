@@ -171,7 +171,7 @@ setTimeout((eve) => {
 }, 1000);
 
 const setSprintDropdownListener = () => {
-    setInterval(()=>{
+    setInterval(() => {
         let dropdown = document.querySelector('#ghx-chart-picker');
         let selectBtn = document.querySelector('#rts-select-btn');
         if (dropdown && dropdown.parentNode && !selectBtn) {
@@ -268,10 +268,10 @@ const settings = () => {
     }
 }
 
-const getSelectedSprint = async (sprintId: string) =>{
+const getSelectedSprint = async (sprintId: string) => {
     let contForProject = document.querySelector('.scope-filter.aui-scope-filter-spectrum > a');
-    let boardId:string | null = '';
-    if (contForProject){
+    let boardId: string | null = '';
+    if (contForProject) {
         let tString = contForProject.getAttribute('href');
         if (tString) {
             const urlParams = new URLSearchParams(tString);
@@ -395,7 +395,7 @@ const generateStat = (sprintNumber: string, response: IJiraIssues) => {
             }
         });
 
-        if (!hasStopLabel) {
+        if (!hasStopLabel && task.fields.issuetype.name !== 'Аналитика') {
             let timeForTask = task.fields.worklog.worklogs.reduce((time, item) => (time + (!!item.timeSpentSeconds ? item.timeSpentSeconds / 60 / 60 : 0)), 0)
 
             switch (label) {
@@ -516,7 +516,7 @@ const generateStat = (sprintNumber: string, response: IJiraIssues) => {
         container.prepend(newTable)
     } else {
         let alternativeContainer = document.querySelector('#ghx-chart-intro');
-        if (alternativeContainer){
+        if (alternativeContainer) {
             alternativeContainer.querySelectorAll('.rts-stat-item').forEach(element => element.remove());
             alternativeContainer.prepend(newTable)
         }
