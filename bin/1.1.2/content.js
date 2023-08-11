@@ -355,7 +355,9 @@ const generateStat = (sprintNumber, response) => {
             }
         });
         if (!hasStopLabel && task.fields.issuetype.name !== 'Аналитика') {
-            let timeForTask = task.fields.worklog.worklogs.reduce((time, item) => (time + (!!item.timeSpentSeconds ? item.timeSpentSeconds / 60 / 60 : 0)), 0);
+            /* let timeForTask = task.fields.worklog.worklogs.reduce((time, item) => (time + (!!item.timeSpentSeconds ? item.timeSpentSeconds / 60 / 60 : 0)), 0)
+ */
+            let timeForTask = task.fields.aggregateprogress.progress ? task.fields.aggregateprogress.progress / 60 / 60 : 0;
             switch (label) {
                 case 'TechDebt':
                     techDebtTasksCount = techDebtTasksCount + 1;

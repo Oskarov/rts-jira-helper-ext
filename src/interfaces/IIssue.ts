@@ -59,9 +59,9 @@ export interface IIssue {
         } | {},
         summary: string,
         aggregateprogress: {
-            progress: 0,
-            total: 10800,
-            percent: 0,
+            progress: number,
+            total: number,
+            percent: number,
         },
     }
 }
