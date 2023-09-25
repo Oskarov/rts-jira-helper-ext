@@ -42,6 +42,10 @@ export interface IIssue {
             maxResults: number,
             total: number,
             worklogs: {
+                author: {
+                    name: string,
+                    key: string,
+                }
                 timeSpentSeconds: number
             }[],
         },

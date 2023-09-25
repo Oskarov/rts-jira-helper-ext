@@ -1,4 +1,5 @@
 import {IJiraIssues} from "./interfaces/IIssue";
+import {worklogs}    from "./worklog";
 
 let savedStatuses: string[] = [];
 let stopLabels: string[] = ['stop', 'Stop', 'STOP', 'exclude_from_sprint'];
@@ -162,6 +163,15 @@ setTimeout((eve) => {
                 }
                 wrapper.append(btn);
 
+                let workLogBtn = document.createElement("div");
+                workLogBtn.innerHTML = "Посчитать работу";
+                workLogBtn.id = `worklog-btn-${idx}`
+                workLogBtn.className = 'dream-btn';
+                workLogBtn.onclick = async (e) => {
+                    await getSprint(i, worklogs);
+                }
+                wrapper.append(workLogBtn);
+
                 i.parentNode.append(wrapper);
             }
         });
@@ -190,6 +200,7 @@ const setSprintDropdownListener = () => {
             }
             dropdown.parentNode.append(btn);
         }
+
     }, 1000);
 
 }
@@ -308,7 +319,7 @@ const getSelectedSprint = async (sprintId: string) => {
 
 }
 
-const getSprint = async (i: Element) => {
+const getSprint = async (i: Element, callbackFunction?: (sprintNumber: string, response: IJiraIssues, boardId:string)=>void) => {
     let contForSprint = i.closest('.ghx-backlog-header.js-sprint-header');
     let contForProject = document.getElementById('browser-metrics-report');
     if (contForSprint && contForProject) {
@@ -338,8 +349,11 @@ const getSprint = async (i: Element) => {
                 }
             }
 
-
-            generateStat(sprintId || '', json);
+            if (callbackFunction) {
+                callbackFunction(sprintId || '', json, boardId);
+            } else {
+                generateStat(sprintId || '', json);
+            }
         } else {
             alert("Ошибка HTTP: " + response.status);
         }
