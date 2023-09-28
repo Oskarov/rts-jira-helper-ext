@@ -1,4 +1,4 @@
-import {IJiraIssues} from "./interfaces/IIssue";
+import {IIssue, IJiraIssues, IWorklog} from "./interfaces/IIssue";
 
 interface ILog {
     [author: string]: number
@@ -15,6 +15,7 @@ export const worklogs = async (sprintId: string, response: IJiraIssues, boardId:
     let allLogs: ILog = {};
     let allIssueTime: Iissue = {};
     let allWorkIssueTime: Iissue = {};
+    let requests: any[] = [];
 
     response.issues.filter(task => !task.fields.parent).forEach((task, idx) => {
         const taskTime = task.fields.aggregatetimeoriginalestimate ? task.fields.aggregatetimeoriginalestimate : 0;
@@ -44,29 +45,52 @@ export const worklogs = async (sprintId: string, response: IJiraIssues, boardId:
         } else {
             allWorkIssueTime[task.key] = taskTime;
         }
+
+        const subtasks = task.fields.subtasks;
+        if (!!subtasks.length) {
+            subtasks.forEach(subtask => {
+                requests.push(fetch(subtask.self));
+            })
+        }
     });
 
-
-    console.log(allIssueTime);
-    console.log(allLogs);
-    console.log(allWorkTime);
-    console.log(allLogTime);
-
-    const newTable = document.createElement('div');
-    newTable.className = 'rts-work-item';
-    newTable.innerHTML = `<div>
-        <h3 style="margin-bottom: 8px; padding-top: 8px; font-weight: bold;">Всего времени:  ${allLogTime / 60 / 60}  / ${allWorkTime / 60 / 60}</h3>
-              
-        <div class="workLogList">
-                        ${Object.keys(allLogs).map((log, idx)=>{
-                            return `<div class="worklogworker"><span>${log}:</span> <span>${allLogs[log] / 60 / 60}</span></div>`    
-                        })}
-        </div>
-                        
+    try {
+        const responses = Promise.all(requests);
+        responses.then(responses => Promise.all(responses.map(r => r.json()))).then((issues: IIssue[]) => {
+            issues.forEach(task => {
+                    const subWorklogs: IWorklog[] = task.fields.worklog.worklogs;
+                    subWorklogs.forEach((log) => {
+                        if (allLogs.hasOwnProperty(log.author.name)) {
+                            const time = allLogs[log.author.name];
+                            allLogs[log.author.name] = time + log.timeSpentSeconds;
+                        } else {
+                            allLogs[log.author.name] = log.timeSpentSeconds;
+                        }
+                    })
+                })
+            }
+        ).then(() => {
+                const newTable = document.createElement('div');
+                newTable.className = 'rts-work-item';
+                newTable.innerHTML = `<div>
+        <h3 style="margin-bottom: 8px; padding-top: 8px; font-weight: bold;">Всего времени:  ${allLogTime / 60 / 60}  / ${allWorkTime / 60 / 60}</h3>  
+        <table class="workLogList">
+                        ${Object.keys(allLogs).map((log) => {
+                    return `<tr class="worklogworker"><td>${log}</td><td>${allLogs[log] / 60 / 60}</td></tr>`
+                }).join('')}
+        </table>       
         </div>`.trim();
-    let container = document.querySelector(`[data-sprint-id="${sprintId}"]`);
-    if (container) {
-        container.querySelectorAll('.rts-work-item').forEach(element => element.remove());
-        container.prepend(newTable)
+                let container = document.querySelector(`[data-sprint-id="${sprintId}"]`);
+                if (container) {
+                    container.querySelectorAll('.rts-work-item').forEach(element => element.remove());
+                    container.prepend(newTable)
+                }
+            }
+        )
+    } catch
+        (err) {
+        console.log('error: ', err);
     }
+
+
 }

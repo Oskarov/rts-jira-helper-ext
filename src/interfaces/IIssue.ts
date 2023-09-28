@@ -67,5 +67,25 @@ export interface IIssue {
             total: number,
             percent: number,
         },
+        subtasks: {
+            fields: {
+                issuetype: {
+                    id: string,
+                    description: string,
+                    name: string,
+                }
+            },
+            id: string,
+            key: string,
+            self: string
+        }[]
     }
+}
+
+export interface IWorklog {
+        author: {
+            name: string,
+            key: string,
+        }
+        timeSpentSeconds: number
 }

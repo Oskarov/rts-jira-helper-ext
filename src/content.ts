@@ -141,6 +141,15 @@ setTimeout((eve) => {
 .dream-vals > div:last-child {
     border-right: none;
 }
+
+.workLogList {
+    border-collapse: collapse;
+}
+
+.workLogList td {
+    padding: 4px 8px;
+    border: 1px solid black;
+}
         `
 
         let styleSheet = document.createElement("style");
