@@ -73,10 +73,10 @@ export const worklogs = async (sprintId: string, response: IJiraIssues, boardId:
                 const newTable = document.createElement('div');
                 newTable.className = 'rts-work-item';
                 newTable.innerHTML = `<div>
-        <h3 style="margin-bottom: 8px; padding-top: 8px; font-weight: bold;">Всего времени:  ${allLogTime / 60 / 60}  / ${allWorkTime / 60 / 60}</h3>  
+        <h3 style="margin-bottom: 8px; padding-top: 8px; font-weight: bold;">Всего времени:  ${(allLogTime / 60 / 60).toFixed(2)}  / ${(allWorkTime / 60 / 60).toFixed(2)}</h3>  
         <table class="workLogList">
                         ${Object.keys(allLogs).map((log) => {
-                    return `<tr class="worklogworker"><td>${log}</td><td>${allLogs[log] / 60 / 60}</td></tr>`
+                    return `<tr class="worklogworker"><td>${log}</td><td>${(allLogs[log] / 60 / 60).toFixed(2)}</td></tr>`
                 }).join('')}
         </table>       
         </div>`.trim();

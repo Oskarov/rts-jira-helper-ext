@@ -175,7 +175,7 @@ setTimeout((eve) => {
                 let workLogBtn = document.createElement("div");
                 workLogBtn.innerHTML = "Посчитать работу";
                 workLogBtn.id = `worklog-btn-${idx}`
-                workLogBtn.className = 'dream-btn';
+                workLogBtn.className = 'dream-btn dream-btn2';
                 workLogBtn.onclick = async (e) => {
                     await getSprint(i, worklogs);
                 }
