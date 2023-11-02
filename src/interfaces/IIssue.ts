@@ -78,8 +78,15 @@ export interface IIssue {
             id: string,
             key: string,
             self: string
-        }[]
+        }[],
+        components: IComponent[]
     }
+}
+
+export interface IComponent {
+    id: string,
+    name: string,
+    self: string
 }
 
 export interface IWorklog {

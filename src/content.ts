@@ -328,7 +328,7 @@ const getSelectedSprint = async (sprintId: string) => {
 
 }
 
-const getSprint = async (i: Element, callbackFunction?: (sprintNumber: string, response: IJiraIssues, boardId:string)=>void) => {
+const getSprint = async (i: Element, callbackFunction?: (sprintNumber: string, response: IJiraIssues, boardId: string) => void) => {
     let contForSprint = i.closest('.ghx-backlog-header.js-sprint-header');
     let contForProject = document.getElementById('browser-metrics-report');
     if (contForSprint && contForProject) {
@@ -379,6 +379,7 @@ const generateStat = (sprintNumber: string, response: IJiraIssues) => {
 
     let withoutLabels: string[] = [];
     let withoutTime: string[] = [];
+    let withoutComponent: string[] = [];
 
     let productTasksTime = 0;
     let techDebtTasksTime = 0;
@@ -397,6 +398,8 @@ const generateStat = (sprintNumber: string, response: IJiraIssues) => {
         const taskLabels = task.fields.labels;
         let label = '';
         let hasStopLabel = false;
+
+        console.log(task);
 
         taskNames.push(task.key);
 
@@ -419,8 +422,8 @@ const generateStat = (sprintNumber: string, response: IJiraIssues) => {
         });
 
         if (!hasStopLabel && task.fields.issuetype.name !== 'Аналитика') {
-           /* let timeForTask = task.fields.worklog.worklogs.reduce((time, item) => (time + (!!item.timeSpentSeconds ? item.timeSpentSeconds / 60 / 60 : 0)), 0)
-*/
+            /* let timeForTask = task.fields.worklog.worklogs.reduce((time, item) => (time + (!!item.timeSpentSeconds ? item.timeSpentSeconds / 60 / 60 : 0)), 0)
+ */
             let timeForTask = task.fields.aggregateprogress.progress ? task.fields.aggregateprogress.progress / 60 / 60 : 0;
 
             switch (label) {
@@ -455,6 +458,9 @@ const generateStat = (sprintNumber: string, response: IJiraIssues) => {
             if (!taskTime) {
                 withoutTime.push(task.key);
             }
+            if (!task.fields.components.length) {
+                withoutComponent.push(task.key)
+            }
             totalCount = totalCount + 1;
         } else {
             stopLabelsCount = stopLabelsCount + 1;
@@ -474,6 +480,10 @@ const generateStat = (sprintNumber: string, response: IJiraIssues) => {
         <div style="margin-bottom: 8px">
            <span style="font-weight: bold">Без указания времени: </span>
            <span>${withoutTime.map(item => `<a href="https://jira.eapteka.ru/browse/${item}" target="_blank">${item}</a>`)}</span>
+        </div>
+        <div style="margin-bottom: 8px">
+           <span style="font-weight: bold">Без указания компонента: </span>
+           <span>${withoutComponent.map(item => `<a href="https://jira.eapteka.ru/browse/${item}" target="_blank">${item}</a>`)}</span>
         </div>
         
         <div class="dream-table">

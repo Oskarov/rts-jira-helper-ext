@@ -1,3 +1,87 @@
+// @ts-ignore
+const worklogs = async (sprintId, response, boardId) => {
+    let allWorkTime = 0;
+    let allLogTime = 0;
+    let allLogs = {};
+    let allIssueTime = {};
+    let allWorkIssueTime = {};
+    let requests = [];
+    response.issues.filter(task => !task.fields.parent).forEach((task, idx) => {
+        const taskTime = task.fields.aggregatetimeoriginalestimate ? task.fields.aggregatetimeoriginalestimate : 0;
+        allWorkTime += taskTime;
+        let timeForTask = task.fields.aggregateprogress.progress ? task.fields.aggregateprogress.progress : 0;
+        allLogTime += timeForTask;
+        let worklogsArr = task.fields.worklog.worklogs;
+        if (worklogsArr.length) {
+            worklogsArr.forEach((log) => {
+                if (allLogs.hasOwnProperty(log.author.name)) {
+                    const time = allLogs[log.author.name];
+                    allLogs[log.author.name] = time + log.timeSpentSeconds;
+                }
+                else {
+                    allLogs[log.author.name] = log.timeSpentSeconds;
+                }
+            });
+        }
+        if (allIssueTime.hasOwnProperty(task.key)) {
+            const time = allIssueTime[task.key];
+            allIssueTime[task.key] = time + timeForTask;
+        }
+        else {
+            allIssueTime[task.key] = timeForTask;
+        }
+        if (allWorkIssueTime.hasOwnProperty(task.key)) {
+            const time = allWorkIssueTime[task.key];
+            allWorkIssueTime[task.key] = time + taskTime;
+        }
+        else {
+            allWorkIssueTime[task.key] = taskTime;
+        }
+        const subtasks = task.fields.subtasks;
+        if (!!subtasks.length) {
+            subtasks.forEach(subtask => {
+                requests.push(fetch(subtask.self));
+            });
+        }
+    });
+    try {
+        const responses = Promise.all(requests);
+        responses.then(responses => Promise.all(responses.map(r => r.json()))).then((issues) => {
+            issues.forEach(task => {
+                const subWorklogs = task.fields.worklog.worklogs;
+                subWorklogs.forEach((log) => {
+                    if (allLogs.hasOwnProperty(log.author.name)) {
+                        const time = allLogs[log.author.name];
+                        allLogs[log.author.name] = time + log.timeSpentSeconds;
+                    }
+                    else {
+                        allLogs[log.author.name] = log.timeSpentSeconds;
+                    }
+                });
+            });
+        }).then(() => {
+            const newTable = document.createElement('div');
+            newTable.className = 'rts-work-item';
+            newTable.innerHTML = `<div>
+        <h3 style="margin-bottom: 8px; padding-top: 8px; font-weight: bold;">Всего времени:  ${(allLogTime / 60 / 60).toFixed(2)}  / ${(allWorkTime / 60 / 60).toFixed(2)}</h3>  
+        <table class="workLogList">
+                        ${Object.keys(allLogs).map((log) => {
+                return `<tr class="worklogworker"><td>${log}</td><td>${(allLogs[log] / 60 / 60).toFixed(2)}</td></tr>`;
+            }).join('')}
+        </table>       
+        </div>`.trim();
+            let container = document.querySelector(`[data-sprint-id="${sprintId}"]`);
+            if (container) {
+                container.querySelectorAll('.rts-work-item').forEach(element => element.remove());
+                container.prepend(newTable);
+            }
+        });
+    }
+    catch (err) {
+        console.log('error: ', err);
+    }
+};
+
 let savedStatuses = [];
 let stopLabels = ['stop', 'Stop', 'STOP', 'exclude_from_sprint'];
 setTimeout((eve) => {
@@ -135,6 +219,15 @@ setTimeout((eve) => {
 .dream-vals > div:last-child {
     border-right: none;
 }
+
+.workLogList {
+    border-collapse: collapse;
+}
+
+.workLogList td {
+    padding: 4px 8px;
+    border: 1px solid black;
+}
         `;
         let styleSheet = document.createElement("style");
         styleSheet.innerText = styles;
@@ -152,6 +245,14 @@ setTimeout((eve) => {
                     await getSprint(i);
                 };
                 wrapper.append(btn);
+                let workLogBtn = document.createElement("div");
+                workLogBtn.innerHTML = "Посчитать работу";
+                workLogBtn.id = `worklog-btn-${idx}`;
+                workLogBtn.className = 'dream-btn dream-btn2';
+                workLogBtn.onclick = async (e) => {
+                    await getSprint(i, worklogs);
+                };
+                wrapper.append(workLogBtn);
                 i.parentNode.append(wrapper);
             }
         });
@@ -279,7 +380,7 @@ const getSelectedSprint = async (sprintId) => {
         }
     }
 };
-const getSprint = async (i) => {
+const getSprint = async (i, callbackFunction) => {
     let contForSprint = i.closest('.ghx-backlog-header.js-sprint-header');
     let contForProject = document.getElementById('browser-metrics-report');
     if (contForSprint && contForProject) {
@@ -307,7 +408,12 @@ const getSprint = async (i) => {
                     }
                 }
             }
-            generateStat(sprintId || '', json);
+            if (callbackFunction) {
+                callbackFunction(sprintId || '', json, boardId);
+            }
+            else {
+                generateStat(sprintId || '', json);
+            }
         }
         else {
             alert("Ошибка HTTP: " + response.status);
@@ -323,6 +429,7 @@ const generateStat = (sprintNumber, response) => {
     let supportTasksCountComplete = 0;
     let withoutLabels = [];
     let withoutTime = [];
+    let withoutComponent = [];
     let productTasksTime = 0;
     let techDebtTasksTime = 0;
     let supportTasksTime = 0;
@@ -337,6 +444,7 @@ const generateStat = (sprintNumber, response) => {
         const taskLabels = task.fields.labels;
         let label = '';
         let hasStopLabel = false;
+        console.log(task);
         taskNames.push(task.key);
         const defaultStatuses = !savedStatuses.length ? ['done', 'готово'] : savedStatuses;
         console.log(`program get this statuses: ${defaultStatuses.toString()}`);
@@ -390,6 +498,9 @@ const generateStat = (sprintNumber, response) => {
             if (!taskTime) {
                 withoutTime.push(task.key);
             }
+            if (!task.fields.components.length) {
+                withoutComponent.push(task.key);
+            }
             totalCount = totalCount + 1;
         }
         else {
@@ -407,6 +518,10 @@ const generateStat = (sprintNumber, response) => {
         <div style="margin-bottom: 8px">
            <span style="font-weight: bold">Без указания времени: </span>
            <span>${withoutTime.map(item => `<a href="https://jira.eapteka.ru/browse/${item}" target="_blank">${item}</a>`)}</span>
+        </div>
+        <div style="margin-bottom: 8px">
+           <span style="font-weight: bold">Без указания компонента: </span>
+           <span>${withoutComponent.map(item => `<a href="https://jira.eapteka.ru/browse/${item}" target="_blank">${item}</a>`)}</span>
         </div>
         
         <div class="dream-table">
